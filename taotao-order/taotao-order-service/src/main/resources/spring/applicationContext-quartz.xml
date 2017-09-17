@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+        
+	<!-- 1、制定任务详细信息bean -->
+	<bean id="orderJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<!-- 执行对象 -->
+		<property name="targetObject" ref="orderServiceImpl" ></property>
+		<!-- 执行对象中的方法 -->
+		<property name="targetMethod" value="autoCloseOrder"></property>
+		<!-- 是否可并发执行；设置为不并发 -->
+		<property name="concurrent" value="false"></property>
+	</bean>
+	
+	<!-- 2、制定任务调度触发器bean -->
+	<bean id="orderCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<!-- 任务详细信息 -->
+		<property name="jobDetail" ref="orderJobDetail"></property>
+		<!-- 执行时间；执行表达式：秒 分 时 日 月 周 年（可选）；因为上课关系指定每5秒执行一次 -->
+		<property name="cronExpression" value="0/5 * * * * ?"></property>
+	</bean>
+	
+	<!-- 3、设置任务调度触发器工厂bean -->
+	<bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="orderCronTrigger"/>
+			</list>
+		</property>
+	</bean>
+</beans>
+
